@@ -1,0 +1,53 @@
+<beans:beans xmlns="http://www.springframework.org/schema/security"
+             xmlns:beans="http://www.springframework.org/schema/beans"
+             xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+             xsi:schemaLocation="http://www.springframework.org/schema/beans
+                 http://www.springframework.org/schema/beans/spring-beans-4.1.xsd
+                 http://www.springframework.org/schema/security
+                 http://www.springframework.org/schema/security/spring-security-4.1.xsd">
+    <http auto-config="true" use-expressions="true">
+        <intercept-url pattern="/" access="permitAll" />
+        <intercept-url pattern="/index.action" access="hasRole('ROLE_USER')" />
+
+        <form-login  login-page="/login.action"
+                     default-target-url="/index.action"
+                     username-parameter="login"
+                     password-parameter="password"
+                     login-processing-url="/login.action"
+                     authentication-failure-url="/login.action?error=true" />
+        <logout logout-url="/logout.action" logout-success-url="/login.action?logout=true"/>
+        <csrf/>
+    </http>
+
+    <beans:bean id="dataSource"
+                class="org.springframework.jdbc.datasource.DriverManagerDataSource">
+
+        <beans:property name="driverClassName" value="com.mysql.jdbc.Driver" />
+        <beans:property name="url"
+                        value="jdbc:mysql://localhost:3306/test" />
+        <beans:property name="username" value="user" />
+        <beans:property name="password" value="user1" />
+    </beans:bean>
+
+    <beans:bean id="sessionFactory"
+          class="org.springframework.orm.hibernate4.LocalSessionFactoryBean">
+        <beans:property name="dataSource" ref="dataSource"/>
+        <beans:property name="annotatedClasses">
+        <beans:list>
+            <beans:value>ru.testapp.entity.User</beans:value>
+        </beans:list>
+        </beans:property>
+        <beans:property name="hibernateProperties">
+            <beans:props>
+                <beans:prop key="hibernate.dialect">org.hibernate.dialect.MySQLDialect</beans:prop>
+                <beans:prop key="hibernate.show_sql">false</beans:prop>
+                <beans:prop key="hibernate.hbm2ddl.auto">update</beans:prop>
+            </beans:props>
+        </beans:property>
+    </beans:bean>
+
+    <authentication-manager>
+        <authentication-provider ref="userDetailsService"/>
+        <!--<authentication-provider user-service-ref="userDetailsService"/>-->
+    </authentication-manager>
+</beans:beans>
